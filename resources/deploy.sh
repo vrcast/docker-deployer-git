@@ -2,9 +2,6 @@
 
 CLONE_TEMP_DIR="/tmp/clone"
 GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i /root/.ssh/git"
-TARGET_WWW="/var/www/$VERSION/"
-TARGET_CRON="/var/cron/$VERSION/"
-TARGET_MAINTENANCE="/maintenance/$VERSION/"                                                                                           
 
 clone_git () {
 	export GIT_SSH_COMMAND
@@ -13,36 +10,17 @@ clone_git () {
 	cd ${CLONE_TEMP_DIR}
 	VERSION=`git rev-parse --short HEAD`
 	sed -i "s/'');/'${VERSION}');/" ${CLONE_TEMP_DIR}/www/version.php
+	export $VERSION
 }
 
-deploy_www () { 
+deploy () {
 	echo
-	echo "Deploying www code"
-	stat "$TARGET_WWW" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
-	cp -a ${CLONE_TEMP_DIR}/www/ "$TARGET_WWW" && echo "Done" || echo "Failed"
-	echo "Relinking $TARGET_WWW to /var/www/html"
-	rm /var/www/html
-	ln -s "$TARGET_WWW" /var/www/html && echo "Done" || echo "Failed"
-}
-
-deploy_cron () { 
-	echo
-	echo "Deploying cron code"
-	stat "$TARGET_CRON" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
-	cp -a ${CLONE_TEMP_DIR}/cron/ "$TARGET_CRON" && echo "Done" || echo "Failed"
-	echo "Relinking $TARGET_CRON to /var/cron/current"
-	rm /var/cron/current
-	ln -s "$TARGET_CRON" /var/cron/current && echo "Done" || echo "Failed"
-}
-
-deploy_maintenance () { 
-	echo
-	echo "Deploying maintenance code"
-	stat "$TARGET_MAINTENANCE" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
-	cp -a ${CLONE_TEMP_DIR}/maintenance/ "$TARGET_MAINTENANCE" && echo "Done" || echo "Failed"
-	echo "Relinking $TARGET_MAINTENANCE to /maintenance/current"
-	rm /maintenance/current
-	ln -s "$TARGET_MAINTENANCE" /maintenance/current && echo "Done" || echo "Failed"
+	echo "Deploying $2 code"
+	stat "$3/$1" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
+	cp -a ${CLONE_TEMP_DIR}/$2/ "$3/$1" && echo "Done" || echo "Failed"
+	echo "Relinking $3/$1 to $3/$4"
+	rm $3/$4
+	ln -s "$3/$1" $3/$4 && echo "Done" || echo "Failed"
 }
 
 rotate () {
@@ -64,27 +42,36 @@ print_footer () {
 case "$1" in
 	all)
 		clone_git
-		deploy_www
-		deploy_cron
-		deploy_maintenance
+		deploy $VERSION www /var/www html
+		deploy $VERSION cron /var/www current
+		deploy $VERSION maintenance /maintenance current
+		rotate /var/www
+		rotate /var/cron
+		rotate /maintenance
 		print_footer
 		;;
 	www)
-		deploy_www
+		clone_git
+		deploy $VERSION www /var/www html
+		rotate /var/www
 		print_footer
 		;;
 	cron)
-		deploy_cron
+		clone_git
+		deploy $VERSION cron /var/www current
+		rotate /var/cron
 		print_footer
 		;;
 	maintenance)
-		deploy_maintenance
+		clone_git
+		deploy $VERSION maintenance /maintenance current
+		rotate /maintenance
 		print_footer
 		;;
 	rotate)
-		rotate $TARGET_WWW
-		rotate $TARGET_CRON
-		rotate $TARGET_MAINTENANCE
+		rotate /var/www
+		rotate /var/cron
+		rotate /maintenance
 		;;
 	clone)
 		clone_git
