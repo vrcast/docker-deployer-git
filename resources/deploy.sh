@@ -43,7 +43,7 @@ case "$1" in
 	all)
 		clone_git
 		deploy $VERSION www /var/www html
-		deploy $VERSION cron /var/www current
+		deploy $VERSION cron /var/cron current
 		deploy $VERSION maintenance /maintenance current
 		rotate /var/www
 		rotate /var/cron
@@ -58,7 +58,7 @@ case "$1" in
 		;;
 	cron)
 		clone_git
-		deploy $VERSION cron /var/www current
+		deploy $VERSION cron /var/cron current
 		rotate /var/cron
 		print_footer
 		;;
