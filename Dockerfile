@@ -1,5 +1,5 @@
 FROM alpine
-LABEL version="1.0.0"
+LABEL version="1.1.0"
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache lighttpd git openssh rsync
@@ -13,7 +13,7 @@ RUN chmod +x /usr/local/bin/* /usr/local/sbin/* \
 
 EXPOSE 80
 
-ENV GIT_SSH_KEY="" GIT_SSH_TARGET=""
+ENV GIT_SSH_KEY="" GIT_SSH_TARGET="" ROTATE_MAX_DAYS=90
 
 # ENTRYPOINT /usr/local/sbin/entrypoint.sh
 # CMD ["/usr/local/sbin/deploy.sh", "clone"]

@@ -2,6 +2,9 @@
 
 CLONE_TEMP_DIR="/tmp/clone"
 GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i /root/.ssh/git"
+TARGET_WWW="/var/www/$VERSION/"
+TARGET_CRON="/var/cron/$VERSION/"
+TARGET_MAINTENANCE="/maintenance/$VERSION/"                                                                                           
 
 clone_git () {
 	export GIT_SSH_COMMAND
@@ -13,7 +16,6 @@ clone_git () {
 }
 
 deploy_www () { 
-	TARGET_WWW="/var/www/$VERSION/"
 	echo
 	echo "Deploying www code"
 	stat "$TARGET_WWW" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
@@ -24,7 +26,6 @@ deploy_www () {
 }
 
 deploy_cron () { 
-	TARGET_CRON="/var/cron/$VERSION/"
 	echo
 	echo "Deploying cron code"
 	stat "$TARGET_CRON" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
@@ -35,7 +36,6 @@ deploy_cron () {
 }
 
 deploy_maintenance () { 
-	TARGET_MAINTENANCE="/maintenance/$VERSION/"
 	echo
 	echo "Deploying maintenance code"
 	stat "$TARGET_MAINTENANCE" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
@@ -44,6 +44,16 @@ deploy_maintenance () {
 	rm /maintenance/current
 	ln -s "$TARGET_MAINTENANCE" /maintenance/current && echo "Done" || echo "Failed"
 }
+
+rotate () {
+	TRASH=$1/trash
+	echo
+	echo "Rotating $1 $ROTATE_MAX_DAYS days old releases"
+	mkdir $TRASH 2> /dev/null || touch $TRASH
+	echo "Deleting ..."
+	find $TRASH -type d -mindepth 1 -maxdepth 1 -print -exec rm -r {} \;
+	echo "Moving to trash ..."
+	find $1 -type d -mtime +$ROTATE_MAX_DAYS -mindepth 1 -maxdepth 1 -print -exec mv {} $TRASH \;
 
 print_footer () {
 	echo "Finished"
@@ -70,6 +80,10 @@ case "$1" in
 		deploy_maintenance
 		print_footer
 		;;
+	rotate)
+		rotate $TARGET_WWW
+		rotate $TARGET_CRON
+		rotate $TARGET_MAINTENANCE
 	clone)
 		clone_git
 		;;
