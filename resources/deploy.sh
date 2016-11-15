@@ -10,7 +10,7 @@ clone_git () {
 	cd ${CLONE_TEMP_DIR}
 	VERSION=`git rev-parse --short HEAD`
 	sed -i "s/'');/'${VERSION}');/" ${CLONE_TEMP_DIR}/www/version.php
-	export $VERSION
+	export VERSION
 }
 
 deploy () {
