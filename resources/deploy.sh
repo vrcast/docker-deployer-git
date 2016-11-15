@@ -54,6 +54,7 @@ rotate () {
 	find $TRASH -type d -mindepth 1 -maxdepth 1 -print -exec rm -r {} \;
 	echo "Moving to trash ..."
 	find $1 -type d -mtime +$ROTATE_MAX_DAYS -mindepth 1 -maxdepth 1 -print -exec mv {} $TRASH \;
+}
 
 print_footer () {
 	echo "Finished"
@@ -84,6 +85,7 @@ case "$1" in
 		rotate $TARGET_WWW
 		rotate $TARGET_CRON
 		rotate $TARGET_MAINTENANCE
+		;;
 	clone)
 		clone_git
 		;;
