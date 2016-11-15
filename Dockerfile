@@ -1,5 +1,5 @@
 FROM alpine
-LABEL version="1.1.3"
+LABEL version="1.1.4"
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache lighttpd git openssh rsync
