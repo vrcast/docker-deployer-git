@@ -1,5 +1,6 @@
 FROM alpine
-LABEL version="1.1.4"
+LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>"
+LABEL version="1.2.0"
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache lighttpd git openssh rsync
