@@ -1,12 +1,12 @@
 FROM alpine
-LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>" version="1.3.0"
+LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>" version="1.3.1"
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache lighttpd git openssh rsync
 COPY resources/*.sh /usr/local/sbin/
 COPY resources/lighttpd.conf /usr/local/etc/lighttpd.conf
 
-RUN chmod +x /usr/local/bin/* /usr/local/sbin/* \
+RUN chmod +x /usr/local/sbin/* \
  && mkdir -p /root/.ssh/
 
 EXPOSE 80
