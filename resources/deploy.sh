@@ -7,7 +7,7 @@ GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i /root/.ssh/git"
 clone_git () {
 	export GIT_SSH_COMMAND
 	rm -r ${CLONE_TEMP_DIR} || true
-	git clone --depth=1 ${GIT_SSH_TARGET} ${CLONE_TEMP_DIR}
+	git clone -b ${GIT_BRANCH} --depth=1 ${GIT_SSH_TARGET} ${CLONE_TEMP_DIR}
 	cd ${CLONE_TEMP_DIR}
 	VERSION=`git rev-parse --short HEAD`
 	sed -i "s/'');/'${VERSION}');/" ${CLONE_TEMP_DIR}/www/version.php
