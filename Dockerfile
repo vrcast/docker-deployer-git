@@ -1,8 +1,7 @@
 FROM alpine
 
-
 RUN apk update && apk upgrade
-RUN apk add --no-cache lighttpd git openssh rsync
+RUN apk add --no-cache lighttpd git openssh rsync bash
 COPY resources/*.sh /usr/local/sbin/
 COPY resources/lighttpd.conf /usr/local/etc/lighttpd.conf
 
@@ -16,4 +15,4 @@ ENV GIT_SSH_KEY= GIT_SSH_TARGET= ROTATE_MAX_DAYS=90 GIT_BRANCH=master
 # ENTRYPOINT /usr/local/sbin/entrypoint.sh
 # CMD ["/usr/local/sbin/deploy.sh", "clone"]
 CMD ["lighttpd", "-D", "-f", "/usr/local/etc/lighttpd.conf"]
-LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>" version="1.4.0"
+LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>" version="1.5.0"
