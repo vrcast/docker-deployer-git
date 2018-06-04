@@ -8,19 +8,19 @@ clone_git () {
 	export GIT_SSH_COMMAND
 	rm -r ${CLONE_TEMP_DIR} || true
 	git clone -b ${GIT_BRANCH} --depth=1 ${GIT_SSH_TARGET} ${CLONE_TEMP_DIR}
-	cd ${CLONE_TEMP_DIR}
-	VERSION=`git rev-parse --short HEAD`
-	sed -i -E "s/(CODE_VERSION\s*=\s*')[^']+/\1${VERSION}/" ${CLONE_TEMP_DIR}/www/version.php
-	export VERSION
+	CODE_VERSION=`sed -n -E "s/.*CODE_VERSION\s*=\s*'([^']+)'.*/\1/p" ${CLONE_TEMP_DIR}/${VERSION_FILE}`
+	echo "Version: ${CODE_VERSION}"
+	export CODE_VERSION
 }
 
 deploy () {
 	echo
 	echo "Deploying $2 code"
+	mkdir -p "$3" 2>&1 || true
 	stat "$3/$1" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
 	cp -a ${CLONE_TEMP_DIR}/$2/ "$3/$1" && echo "Done" || echo "Failed"
 	echo "Relinking $3/$1 to $3/$4"
-	rm $3/$4
+	stat "$3/$4" >/dev/null 2>&1 && rm $3/$4
 	ln -s "$3/$1" $3/$4 && echo "Done" || echo "Failed"
 }
 
@@ -43,34 +43,49 @@ print_footer () {
 case "$1" in
 	all)
 		clone_git
-		deploy $VERSION www /var/www html
-		deploy $VERSION cron /var/cron current
-		deploy $VERSION maintenance /maintenance current
+		deploy $CODE_VERSION www /var/www html
+		deploy $CODE_VERSION src /var/src current
+		deploy $CODE_VERSION cron /var/cron current
+		deploy $CODE_VERSION maintenance /maintenance current
 		rotate /var/www
+		rotate /var/src
 		rotate /var/cron
 		rotate /maintenance
 		print_footer
 		;;
+	laravel)
+		clone_git
+		deploy $CODE_VERSION laravel /repo/laravel current
+		rotate /repo/laravel
+		print_footer
+		;;
 	www)
 		clone_git
-		deploy $VERSION www /var/www html
+		deploy $CODE_VERSION www /var/www html
 		rotate /var/www
+		print_footer
+		;;
+	src)
+		clone_git
+		deploy $CODE_VERSION src /var/src current
+		rotate /var/src
 		print_footer
 		;;
 	cron)
 		clone_git
-		deploy $VERSION cron /var/cron current
+		deploy $CODE_VERSION cron /var/cron current
 		rotate /var/cron
 		print_footer
 		;;
 	maintenance)
 		clone_git
-		deploy $VERSION maintenance /maintenance current
+		deploy $CODE_VERSION maintenance /maintenance current
 		rotate /maintenance
 		print_footer
 		;;
 	rotate)
 		rotate /var/www
+		rotate /var/src
 		rotate /var/cron
 		rotate /maintenance
 		;;
@@ -78,6 +93,6 @@ case "$1" in
 		clone_git
 		;;
 	*)
-		echo "Usage: all|clone|www|cron|maintenance"
+		echo "Usage: all|clone|www|src|cron|maintenance"
 		exit 1
 esac
