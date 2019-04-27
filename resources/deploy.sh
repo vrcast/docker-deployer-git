@@ -6,7 +6,7 @@ GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i /root/.ssh/git"
 
 clone_git () {
 	export GIT_SSH_COMMAND
-	rm -r ${CLONE_TEMP_DIR} || true
+	rm -rf ${CLONE_TEMP_DIR} || true
 	git clone -b ${GIT_BRANCH} --depth=1 ${GIT_SSH_TARGET} ${CLONE_TEMP_DIR}
 	CODE_VERSION=`sed -n -E "s/.*CODE_VERSION\s*=\s*'([^']+)'.*/\1/p" ${CLONE_TEMP_DIR}/${VERSION_FILE}`
 	echo "Version: ${CODE_VERSION}"
@@ -18,10 +18,17 @@ deploy () {
 	echo "Deploying $2 code"
 	mkdir -p "$3" 2>&1 || true
 	stat "$3/$1" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
+
+	rm -rf "$3/previous"
+	mkdir -p "$3/latest" && cp -R "$3/latest" "$3/previous"
+	rm -f  "$3/$4" && ln -s "$3/previous" "$3/$4"
+	rm -rf "$3/latest"
+
 	cp -a ${CLONE_TEMP_DIR}/$2/ "$3/$1" && echo "Done" || echo "Failed"
-	echo "Relinking $3/$1 to $3/$4"
-	stat "$3/$4" >/dev/null 2>&1 && rm $3/$4
-	ln -s "$3/$1" $3/$4 && echo "Done" || echo "Failed"
+	cp -a ${CLONE_TEMP_DIR}/$2/ "$3/latest" && echo "Done" || echo "Failed"
+
+	echo "Relinking $3/latest ($1) to $3/$4"
+	rm -f "$3/$4" && ln -s "$3/latest" "$3/$4" && echo "Done" || echo "Failed"
 }
 
 rotate () {

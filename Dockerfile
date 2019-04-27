@@ -12,7 +12,6 @@ EXPOSE 80
 
 ENV GIT_SSH_KEY= GIT_SSH_TARGET= ROTATE_MAX_DAYS=90 GIT_BRANCH=master VERSION_FILE=www/version.php
 
-ENTRYPOINT /usr/local/sbin/entrypoint.sh
-# CMD ["/usr/local/sbin/deploy.sh", "clone"]
+ENTRYPOINT ["/usr/local/sbin/entrypoint.sh"]
 CMD ["lighttpd", "-D", "-f", "/usr/local/etc/lighttpd.conf"]
-LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>" version="1.7.0"
+LABEL maintainer="Alexandre Buisine <alexandrejabuisine@gmail.com>" version="1.8.0"

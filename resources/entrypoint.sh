@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 GIT_SSH_KEY_FILE="/root/.ssh/git"
 
