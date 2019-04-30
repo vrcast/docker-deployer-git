@@ -17,7 +17,6 @@ deploy () {
 	echo
 	echo "Deploying $2 code"
 	mkdir -p "$3" 2>&1 || true
-	stat "$3/$1" >/dev/null 2>&1 && echo "Already deployed" && echo "Exiting ..." && return
 
 	rm -rf "$3/previous"
 	mkdir -p "$3/latest" && cp -R "$3/latest" "$3/previous"
@@ -50,6 +49,7 @@ print_footer () {
 case "$1" in
 	all)
 		clone_git
+		diff "${CLONE_TEMP_DIR}/${VERSION_FILE}" "/latest-version.php" -q && echo "Already deployed" && echo "Exiting ..." && exit
 		deploy $CODE_VERSION www /var/www html
 		deploy $CODE_VERSION src /var/src current
 		deploy $CODE_VERSION cron /var/cron current
@@ -58,6 +58,7 @@ case "$1" in
 		rotate /var/src
 		rotate /var/cron
 		rotate /maintenance
+		cp "${CLONE_TEMP_DIR}/${VERSION_FILE}" "/latest-version.php"
 		print_footer
 		;;
 	laravel)
